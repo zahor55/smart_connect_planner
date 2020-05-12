@@ -1,0 +1,32 @@
+.map-builder {
+  position: relative;
+  display: flex;
+}
+
+.map-builder .map {
+  background-image: url(/grid.png);
+}
+
+.map-builder .tiles {
+  flex: 20%;
+  border: 1px solid #acd372;
+  border-left: none;
+}
+
+.navBar{
+  position: relative;
+  width: 100%;
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+.button,.components,.title{
+  position: relative;
+  margin-left: 5px;
+
+}
+.submit{
+  position: relative;
+  margin-left: 10px;
+  margin-top: 25px;
+  width: 200px;
+}

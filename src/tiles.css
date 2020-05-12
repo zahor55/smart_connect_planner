@@ -1,0 +1,55 @@
+.tile {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+.placed.tile {
+  position: absolute;
+}
+
+.board {
+  background: url(/board.png);
+}
+.topRight {
+  background: url(/topRight.png);
+}
+.right {
+  background: url(/right.png);
+}
+.left {
+  background: url(/left.png);
+}
+.strightLine {
+  background: url(/strightLine.png);
+}
+.Horizontal {
+  background: url(/Horizontal.png);
+}
+.audio {
+  background: url(/audio.png);
+}
+.leftTop {
+  background: url(/leftTop.png);
+}
+.Window {
+  background: url(/Window.png);
+}
+.Door {
+  background: url(/Door.png);
+}
+.move-left {
+  background: url(/move-left.png);
+}
+.move-right {
+  background: url(/move-right.png);
+}
+.move-down {
+  background: url(/move-down.png);
+}
+.Led {
+  background: url(/Led.png);
+}
