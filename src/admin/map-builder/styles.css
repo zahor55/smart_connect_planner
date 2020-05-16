@@ -30,3 +30,26 @@
   margin-top: 25px;
   width: 200px;
 }
+
+.placed .tooltiptext{
+  visibility: hidden;
+  width: 80px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  margin-left: 22px;
+  opacity: 50%;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+.placed:hover .tooltiptext {
+  visibility: visible;
+}
+
+.empty:hover .tooltiptext{
+  visibility: hidden !important;
+}

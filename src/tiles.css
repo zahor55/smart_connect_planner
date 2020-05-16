@@ -14,42 +14,29 @@
 .board {
   background: url(/board.png);
 }
-.topRight {
-  background: url(/topRight.png);
-}
-.right {
-  background: url(/right.png);
-}
-.left {
-  background: url(/left.png);
-}
-.strightLine {
-  background: url(/strightLine.png);
-}
-.Horizontal {
-  background: url(/Horizontal.png);
-}
 .audio {
   background: url(/audio.png);
 }
-.leftTop {
-  background: url(/leftTop.png);
-}
+
 .Window {
   background: url(/Window.png);
 }
 .Door {
   background: url(/Door.png);
 }
-.move-left {
-  background: url(/move-left.png);
-}
-.move-right {
-  background: url(/move-right.png);
-}
-.move-down {
-  background: url(/move-down.png);
-}
+
 .Led {
   background: url(/Led.png);
+}
+.room-3x3 {
+  background: url(/area.png);
+}
+.room-4x4 {
+  background: url(/area.png);
+}
+.room-5x5 {
+  background: url(/area.png);
+}
+.room-6x6 {
+  background: url(/area.png);
 }

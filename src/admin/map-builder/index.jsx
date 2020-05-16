@@ -6,43 +6,31 @@ import Xarrow from "react-xarrows";
 const tiles = [
   "empty",
   "board",
-  "strightLine",
-  "Horizontal",
-  "right",
-    "left",
-    "leftTop",
-    "topRight",
     "Window",
     "Door",
     "audio",
     "Led",
-  "move-down",
-  "move-right",
-  "move-left"
+  "room-3x3",
+  "room-4x4",
+  "room-5x5",
+  "room-6x6"
 ];
 const sensor=[
   "audio",
-  "move-down",
-    "move-right",
-    "move-left",
     "Led"
 ];
-const home=[
-    "Window",
-  "Door"
-];
 const walls=[
-  "strightLine",
-  "Horizontal",
-  "right","left",
-  "leftTop",
-  "topRight",
+  "Window",
+  "Door",
+  "room-3x3",
+  "room-4x4",
+  "room-5x5",
+  "room-6x6"
 ];
 const MAP_SIZE = {
   width: SIZE * 20,
   height: SIZE * 14
 };
-
 const defaultTiles = [];
 for (let i = 0; i < MAP_SIZE.height / SIZE; i++) {
   for (let j = 0; j < MAP_SIZE.width / SIZE; j++) {
@@ -63,11 +51,13 @@ export default function AdminMapBuilder() {
   const [placedTiles, setPlacedTiles] = useState(defaultTiles);
   const [compButton,setCompButton] = useState("all");
   const [lines,setLines]= useState([]);
+  const [rooms,setRoom]=useState([])
+  const [roomLines,setRoomLines]=useState([])
   const forceUpdate = useForceUpdate();
   useEffect(()=>{
-    setPlacedTiles(JSON.parse(localStorage.getItem("position")))
+    setPlacedTiles(JSON.parse(localStorage.getItem("position")));
     let x=lines;
-    let line=JSON.parse(localStorage.getItem("lines"))
+    let line=JSON.parse(localStorage.getItem("lines"));
     for(let i in line){
       let y=[line[i][0],line[i][1],<Xarrow
           start={line[i][0]}//can be react ref
@@ -77,11 +67,16 @@ export default function AdminMapBuilder() {
       x.push(y)
     }
     setLines(x)
+    let room=JSON.parse(localStorage.getItem("room"));
+    for(let i in room){
+      buildRoom((room[i]["size"]+1).toString(),room[i]["start"])      //first paramter must to be string
+    }
 
-  },[])
+
+  },[]);
   function sensorToBoard(afterSubmit) {
     for (const square in afterSubmit){
-      let temp=0
+      let temp=0;
       if(afterSubmit[square]==="board"){
         for(let x in lines){
           if(lines[x][0]===square || lines[x][1]===square){
@@ -97,7 +92,7 @@ export default function AdminMapBuilder() {
   }
   function boardNotConnected(afterSubmit) {   //check if has board without connection
     for(const square in afterSubmit){
-      let temp=true
+      let temp=true;
       if(afterSubmit[square]==="board"){
         for (const x in lines){
           if(lines[x][0]===square || lines[x][1]===square){
@@ -111,18 +106,18 @@ export default function AdminMapBuilder() {
     }
   }
   function sensorConnectToSensor(twoDarray){
-    let notificationPosition=[],notificationName=[]
+    let notificationPosition=[],notificationName=[];
     for (const square in twoDarray){
       if(sensor.includes(twoDarray[square])){     //this square is sensor
         for(const x in lines){
           if(lines[x][0]===square || lines[x][1]===square){       //found the square
             if(sensor.includes(twoDarray[lines[x][0]]) && sensor.includes(twoDarray[lines[x][1]])){
               if(!notificationPosition.includes(lines[x][0])){
-                notificationPosition.push(lines[x][0])
+                notificationPosition.push(lines[x][0]);
                 notificationName.push(twoDarray[lines[x][0]])
               }
               if(!notificationPosition.includes(lines[x][1])){
-                notificationPosition.push(lines[x][1])
+                notificationPosition.push(lines[x][1]);
                 notificationName.push(twoDarray[lines[x][1]])
               }
             }
@@ -137,7 +132,7 @@ export default function AdminMapBuilder() {
   }
   function sensorNotConnected(afterSubmit) {
     for (const square in afterSubmit ){
-      let temp=false
+      let temp=false;
       if(sensor.includes(afterSubmit[square])){
         for(let x in lines){
           if((lines[x][0]===square || lines[x][1]===square) &&
@@ -154,27 +149,106 @@ export default function AdminMapBuilder() {
 
     }
   }
+  function buildRoom(roomSize,startPoint) {     //build room in the board
+    const size=parseInt(roomSize[0])-1
+    const xStart=parseInt(startPoint.split("_")[0]);    //get  x_y example 12_14
+    const yStart=parseInt(startPoint.split("_")[1]);
+    if(xStart+size>19 || yStart+size>14){     //the board is 19*14 -check if the room exceed out of board
+      alert("the room exceed the board");
+      return -1;
+    }
+    let y={}
+    y["size"]=size
+    y["start"]=startPoint
+    let right=[`${xStart+size}_${yStart}`,`${xStart+size}_${yStart+size}`,<Xarrow
+        consoleWarning={false}
+        start={`${xStart+size}_${yStart}`}//can be react ref
+        end={`${xStart+size}_${yStart+size}`} //or an id
+        headSize={1}
+    />];
+    let left=[`${xStart}_${yStart}`,`${xStart}_${yStart+size}`,<Xarrow
+        consoleWarning={false}
+        start={`${xStart}_${yStart}`}//can be react ref
+        end={`${xStart}_${yStart+size}`} //or an id
+        headSize={1}
+    />];
+    let top=[`${xStart}_${yStart}`,`${xStart+size}_${yStart+size}`,<Xarrow
+        consoleWarning={false}
+        start={`${xStart}_${yStart}`}//can be react ref
+        end={`${xStart+size}_${yStart-size+size}`} //or an id
+        headSize={1}
+    />];
+    let bottom=[`${xStart}_${yStart+size}`,`${xStart+size}_${yStart+size}`,<Xarrow
+        consoleWarning={false}
+        start={`${xStart}_${yStart+size}`}//can be react ref
+        end={`${xStart+size}_${yStart+size}`} //or an id
+        headSize={1}
+    />];
+    y["right"]=right
+    y["top"]=top
+    y["bottom"]=bottom
+    y["left"]=left
+    let x=roomLines;
+    x.push(y)
+    setRoomLines(x)
+  }
+  function destroyRoom(start,size=0) {        //remove room from board-when tap twice on the start square
+    let room=[]
+    if(size===0){
+      room=roomLines.filter(x=>x["start"]!==start)
+    }
+    else{         //remove old room
+      console.log(size,start,roomLines)
+      roomLines.forEach(elem=>{
+        if(elem["start"]===start){
+          if(elem["size"]!==size-1){
+            room.push(elem)
+          }
+        }
+        else{
+          room.push(elem)
+        }
+      })
+    }
+    setRoomLines(room)
+  }
   function handleDrag(e) {
     e.dataTransfer.setData("text", e.target.id)
   }
   function handleDrop(e) {
     e.preventDefault();
 
-    const tile = e.dataTransfer.getData("text").split("_")[0];
+    const tile = e.dataTransfer.getData("text").split("_")[0];    //what drag
     if(e.dataTransfer.getData("text").match(/^\d/)===null){
-      if(tile==="empty"){
+      let one=e.target.className.split(" ")[2]   //e.target is where to drop
+      //when drag and drop component
+      if(tile==="empty" ){     //drop empty square
+        if(one.slice(0,4)==="room"){      //remove all line connected
+          destroyRoom(e.target.id)
+        }
         let x=lines.filter(x =>{
           if(x[0]!==e.target.id && x[1]!== e.target.id ){
-            return x
+            return x                //if has line connected
           }
         });
         setLines(x);
 
-        console.log(e.target.id)
       }
+
       placeTile(tile, e.clientX, e.clientY)
+      if(tile.slice(0,4)==="room"){
+        buildRoom(tile.slice(5,6),e.target.id)
+      }
+      if(e.target.classList[2].slice(0,4)==="room"){      //when try to drop on exist room-need to remove all lines
+        destroyRoom(e.target.id,parseInt(one.slice(5,6)))
+      }
     }
     else{
+      //when draw a line
+      let one=e.target.className.split(" ")[2]
+      if(one.slice(0,4)==="room"){      //if drop on start we remove the room
+        return
+      }
       let temp=document.getElementById(e.dataTransfer.getData("text")).classList[2];
       if(e.target.classList[2]!=="empty" && temp!=="empty" && !walls.includes(temp) && !walls.includes(e.target.classList[2]) ){
         if(e.target.id===e.dataTransfer.getData("text")){
@@ -219,12 +293,16 @@ export default function AdminMapBuilder() {
           height: MAP_SIZE.height + 1
         }}
     >
-      {placedTiles.map((placed, index) => <div
-          className={`placed tile ${placed.tile} ${placed.x / SIZE}_${placed.y / SIZE}`}
+      {placedTiles.map((placed) => <div
+          className={`placed tile ${placed.tile} ${placed.tile==="empty"?"v":"f"} ${placed.x / SIZE}_${placed.y / SIZE}`}
           id={`${placed.x / SIZE}_${placed.y / SIZE}`}
           draggable={true}
           onDragStart={handleDrag}
-          onDoubleClick={e => {
+          onDoubleClick={(e) => {
+            let one=e.target.className.split(" ")[2]
+            if(one.slice(0,4)==="room"){      //if double press on start of room-we remove him
+              return
+            }
             let temp = e.target.id;
             let x = lines.filter(x => {
               if (x[0] !== temp && x[1] !== temp) {
@@ -237,7 +315,9 @@ export default function AdminMapBuilder() {
             left: placed.x,
             top: placed.y
           }}
-      />)}
+      >
+        <span className="tooltiptext">{placed.tile}</span>
+      </div>)}
     </div>
     <div className="tiles">
       <h1 className="title">Smart connect planner</h1>
@@ -245,11 +325,6 @@ export default function AdminMapBuilder() {
         <button className="button" onClick={() => {
           setCompButton("all");
           const x = document.getElementById("0_0");
-          if (x.classList.contains("board") === true) {
-            console.log("bla")
-          } else {
-            console.log(x.classList)
-          }
         }}>all
         </button>
         <button className="button" onClick={() => {
@@ -263,12 +338,13 @@ export default function AdminMapBuilder() {
         <button className="button" onClick={() => {
           setPlacedTiles(defaultTiles);
           setLines([])
+          setRoomLines([])
         }}>reset board
         </button>
 
       </div>
       <div className="components">
-        {compButton === "all" && tiles.map((tile, i) => <div style={{display: "inline-block"}}>
+        {compButton === "all" && tiles.map((tile) => <div style={{display: "inline-block"}}>
           <div
               className={`tile ${tile}`}
               id={`${tile}_i`}
@@ -277,7 +353,7 @@ export default function AdminMapBuilder() {
           />
           <div style={{margin: "10px"}}><h3>{tile}</h3></div>
         </div>)}
-        {compButton === "sensor" && sensor.map((tile, i) => <div style={{display: "inline-block"}}>
+        {compButton === "sensor" && sensor.map((tile) => <div style={{display: "inline-block"}}>
           <div
               className={`tile ${tile}`}
               id={`${tile}_i`}
@@ -286,17 +362,8 @@ export default function AdminMapBuilder() {
           />
           <div style={{margin: "10px"}}><h3>{tile}</h3></div>
         </div>)}
-        {compButton === "home" && home.map((tile, i) => <div style={{display: "inline-block"}}>
-          <div
-              className={`tile ${tile}`}
-              id={`${tile}_i`}
-              draggable={true}
-              onDragStart={handleDrag}
-          />
-          <div style={{margin: "10px"}}><h3>{tile}</h3></div>
-        </div>)
-        &&
-        walls.map((tile, i) => <div style={{display: "inline-block"}}>
+        {compButton === "home" &&
+        walls.map((tile) => <div style={{display: "inline-block"}}>
           <div
               className={`tile ${tile}`}
               id={`${tile}_i`}
@@ -329,9 +396,14 @@ export default function AdminMapBuilder() {
         <button className="submit" onClick={()=>{
           localStorage.setItem("lines",JSON.stringify(lines));
           localStorage.setItem("position",JSON.stringify(placedTiles));
+          localStorage.setItem("room",JSON.stringify(roomLines))
         }}>save</button>
       </div>
     </div>
     {lines.map(x => x[2])}
+    {roomLines.map(x=>x["right"][2])}
+    {roomLines.map(x=>x["left"][2])}
+    {roomLines.map(x=>x["top"][2])}
+    {roomLines.map(x=>x["bottom"][2])}
   </div>
 }
