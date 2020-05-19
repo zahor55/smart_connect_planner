@@ -51,7 +51,6 @@ export default function AdminMapBuilder() {
   const [placedTiles, setPlacedTiles] = useState(defaultTiles);
   const [compButton,setCompButton] = useState("all");
   const [lines,setLines]= useState([]);
-  const [rooms,setRoom]=useState([])
   const [roomLines,setRoomLines]=useState([])
   const forceUpdate = useForceUpdate();
   useEffect(()=>{
@@ -66,6 +65,7 @@ export default function AdminMapBuilder() {
       />];
       x.push(y)
     }
+
     setLines(x)
     let room=JSON.parse(localStorage.getItem("room"));
     for(let i in room){
@@ -74,6 +74,9 @@ export default function AdminMapBuilder() {
 
 
   },[]);
+  useEffect(()=>{
+    console.log(roomLines)
+  },[roomLines])
   function sensorToBoard(afterSubmit) {
     for (const square in afterSubmit){
       let temp=0;
@@ -193,24 +196,38 @@ export default function AdminMapBuilder() {
     setRoomLines(x)
   }
   function destroyRoom(start,size=0) {        //remove room from board-when tap twice on the start square
+    console.log(size)
     let room=[]
-    if(size===0){
+    let flag=false
+    console.log("1- ",room,roomLines)
+    if(size===0){         //if drop component doesnt room
       room=roomLines.filter(x=>x["start"]!==start)
     }
     else{         //remove old room
-      console.log(size,start,roomLines)
       roomLines.forEach(elem=>{
         if(elem["start"]===start){
           if(elem["size"]!==size-1){
-            room.push(elem)
+            if(flag){
+              room.push(elem)
+            }
+
+          }
+          if(elem["size"]===size-1){
+            if(flag){
+              room.push(elem)
+            }
+            flag=true
           }
         }
         else{
           room.push(elem)
         }
       })
+      console.log("2- ",room,roomLines)
     }
     setRoomLines(room)
+
+    console.log("3- ",room,roomLines)
   }
   function handleDrag(e) {
     e.dataTransfer.setData("text", e.target.id)
@@ -226,6 +243,7 @@ export default function AdminMapBuilder() {
         if(one.slice(0,4)==="room"){      //remove all line connected
           destroyRoom(e.target.id)
         }
+
         let x=lines.filter(x =>{
           if(x[0]!==e.target.id && x[1]!== e.target.id ){
             return x                //if has line connected
@@ -240,7 +258,14 @@ export default function AdminMapBuilder() {
         buildRoom(tile.slice(5,6),e.target.id)
       }
       if(e.target.classList[2].slice(0,4)==="room"){      //when try to drop on exist room-need to remove all lines
-        destroyRoom(e.target.id,parseInt(one.slice(5,6)))
+        if(tile.slice(0,4)==="room"){
+          destroyRoom(e.target.id,parseInt(one.slice(5,6)))
+        }
+        else{
+          destroyRoom(e.target.id)
+        }
+        console.log(roomLines)
+
       }
     }
     else{
@@ -259,6 +284,7 @@ export default function AdminMapBuilder() {
             start={e.dataTransfer.getData("text")}//can be react ref
             end={e.target.id} //or an id
             headSize={1}
+            consoleWarning={false}
         />];
         x.push(y);
         setLines(x);
@@ -324,7 +350,6 @@ export default function AdminMapBuilder() {
       <div className="navBar">
         <button className="button" onClick={() => {
           setCompButton("all");
-          const x = document.getElementById("0_0");
         }}>all
         </button>
         <button className="button" onClick={() => {
@@ -346,7 +371,7 @@ export default function AdminMapBuilder() {
       <div className="components">
         {compButton === "all" && tiles.map((tile) => <div style={{display: "inline-block"}}>
           <div
-              className={`tile ${tile}`}
+              className={`tile ${tile} frame`}
               id={`${tile}_i`}
               draggable={true}
               onDragStart={handleDrag}
@@ -355,7 +380,7 @@ export default function AdminMapBuilder() {
         </div>)}
         {compButton === "sensor" && sensor.map((tile) => <div style={{display: "inline-block"}}>
           <div
-              className={`tile ${tile}`}
+              className={`tile ${tile} frame`}
               id={`${tile}_i`}
               draggable={true}
               onDragStart={handleDrag}
@@ -365,7 +390,7 @@ export default function AdminMapBuilder() {
         {compButton === "home" &&
         walls.map((tile) => <div style={{display: "inline-block"}}>
           <div
-              className={`tile ${tile}`}
+              className={`tile ${tile} frame`}
               id={`${tile}_i`}
               draggable={true}
               onDragStart={handleDrag}
@@ -390,7 +415,26 @@ export default function AdminMapBuilder() {
           sensorConnectToSensor(twoDarray);  //rules number 2
           sensorNotConnected(twoDarray); //rules number 3
           boardNotConnected(twoDarray); //rules number 12
-
+          let room=[]
+          roomLines.forEach((elem)=>{
+            let arr=[]
+            let square=elem["start"]
+            let x=parseInt(square.split("_")[0]),y=parseInt(square.split("_")[1])
+            let size=parseInt(elem["size"])+1
+            console.log(x,y,square,size)
+            let sizeIn=0,sizeOut=0
+            while(sizeIn<size){
+              sizeOut=0
+              while(sizeOut<size){
+                arr.push(`${x+sizeOut}_${y}`)
+                sizeOut++
+              }
+              sizeIn++
+              y++
+            }
+            room.push(arr)
+          })
+          console.log(room)
         }}>submit
         </button>
         <button className="submit" onClick={()=>{
