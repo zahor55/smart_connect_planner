@@ -8,6 +8,5 @@ const DIRECTION = {
   RIGHT: SIZE * 2,
   UP: SIZE * 3
 }
-//rules after submit
-const limitSensorsToBoard=10
-export { MAX_STEP, SIZE, DIRECTION,limitSensorsToBoard }
+
+export { MAX_STEP, SIZE, DIRECTION }

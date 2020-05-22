@@ -1,7 +1,8 @@
 import React, { useState,useEffect } from "react"
 import "./styles.css"
-import { SIZE,limitSensorsToBoard } from "../../constants"
+import { SIZE } from "../../constants"
 import Xarrow from "react-xarrows";
+import Settings from "./components/settings.jsx";
 //all component
 const tiles = [
   "empty",
@@ -51,7 +52,7 @@ export default function AdminMapBuilder() {
   const [placedTiles, setPlacedTiles] = useState(defaultTiles);
   const [compButton,setCompButton] = useState("all");
   const [lines,setLines]= useState([]);
-  const [roomLines,setRoomLines]=useState([])
+  const [roomLines,setRoomLines]=useState([]);
   const forceUpdate = useForceUpdate();
   useEffect(()=>{
     setPlacedTiles(JSON.parse(localStorage.getItem("position")));
@@ -66,7 +67,7 @@ export default function AdminMapBuilder() {
       x.push(y)
     }
 
-    setLines(x)
+    setLines(x);
     let room=JSON.parse(localStorage.getItem("room"));
     for(let i in room){
       buildRoom((room[i]["size"]+1).toString(),room[i]["start"])      //first paramter must to be string
@@ -76,17 +77,21 @@ export default function AdminMapBuilder() {
   },[]);
   useEffect(()=>{
     console.log(roomLines)
-  },[roomLines])
+  },[roomLines]);
   function sensorToBoard(afterSubmit) {
     for (const square in afterSubmit){
       let temp=0;
+      let limit=parseInt(JSON.parse(localStorage.getItem("limitSensors")))
+      if(!limit){
+        limit=10
+      }
       if(afterSubmit[square]==="board"){
         for(let x in lines){
           if(lines[x][0]===square || lines[x][1]===square){
             temp++
           }
         }
-        if(temp>=limitSensorsToBoard){
+        if(temp>=limit){
           alert("to many componets  connected to board in x= "+square.split("_")[0]+ "and  y= "+square.split("_")[1])
         }
       }
@@ -153,16 +158,16 @@ export default function AdminMapBuilder() {
     }
   }
   function buildRoom(roomSize,startPoint) {     //build room in the board
-    const size=parseInt(roomSize[0])-1
+    const size=parseInt(roomSize[0])-1;
     const xStart=parseInt(startPoint.split("_")[0]);    //get  x_y example 12_14
     const yStart=parseInt(startPoint.split("_")[1]);
     if(xStart+size>19 || yStart+size>14){     //the board is 19*14 -check if the room exceed out of board
       alert("the room exceed the board");
       return -1;
     }
-    let y={}
-    y["size"]=size
-    y["start"]=startPoint
+    let y={};
+    y["size"]=size;
+    y["start"]=startPoint;
     let right=[`${xStart+size}_${yStart}`,`${xStart+size}_${yStart+size}`,<Xarrow
         consoleWarning={false}
         start={`${xStart+size}_${yStart}`}//can be react ref
@@ -187,19 +192,19 @@ export default function AdminMapBuilder() {
         end={`${xStart+size}_${yStart+size}`} //or an id
         headSize={1}
     />];
-    y["right"]=right
-    y["top"]=top
-    y["bottom"]=bottom
-    y["left"]=left
+    y["right"]=right;
+    y["top"]=top;
+    y["bottom"]=bottom;
+    y["left"]=left;
     let x=roomLines;
-    x.push(y)
+    x.push(y);
     setRoomLines(x)
   }
   function destroyRoom(start,size=0) {        //remove room from board-when tap twice on the start square
-    console.log(size)
-    let room=[]
-    let flag=false
-    console.log("1- ",room,roomLines)
+    console.log(size);
+    let room=[];
+    let flag=false;
+    console.log("1- ",room,roomLines);
     if(size===0){         //if drop component doesnt room
       room=roomLines.filter(x=>x["start"]!==start)
     }
@@ -222,10 +227,10 @@ export default function AdminMapBuilder() {
         else{
           room.push(elem)
         }
-      })
+      });
       console.log("2- ",room,roomLines)
     }
-    setRoomLines(room)
+    setRoomLines(room);
 
     console.log("3- ",room,roomLines)
   }
@@ -237,7 +242,7 @@ export default function AdminMapBuilder() {
 
     const tile = e.dataTransfer.getData("text").split("_")[0];    //what drag
     if(e.dataTransfer.getData("text").match(/^\d/)===null){
-      let one=e.target.className.split(" ")[2]   //e.target is where to drop
+      let one=e.target.className.split(" ")[2];   //e.target is where to drop
       //when drag and drop component
       if(tile==="empty" ){     //drop empty square
         if(one.slice(0,4)==="room"){      //remove all line connected
@@ -253,7 +258,7 @@ export default function AdminMapBuilder() {
 
       }
 
-      placeTile(tile, e.clientX, e.clientY)
+      placeTile(tile, e.clientX, e.clientY);
       if(tile.slice(0,4)==="room"){
         buildRoom(tile.slice(5,6),e.target.id)
       }
@@ -270,7 +275,7 @@ export default function AdminMapBuilder() {
     }
     else{
       //when draw a line
-      let one=e.target.className.split(" ")[2]
+      let one=e.target.className.split(" ")[2];
       if(one.slice(0,4)==="room"){      //if drop on start we remove the room
         return
       }
@@ -325,7 +330,7 @@ export default function AdminMapBuilder() {
           draggable={true}
           onDragStart={handleDrag}
           onDoubleClick={(e) => {
-            let one=e.target.className.split(" ")[2]
+            let one=e.target.className.split(" ")[2];
             if(one.slice(0,4)==="room"){      //if double press on start of room-we remove him
               return
             }
@@ -362,7 +367,7 @@ export default function AdminMapBuilder() {
         </button>
         <button className="button" onClick={() => {
           setPlacedTiles(defaultTiles);
-          setLines([])
+          setLines([]);
           setRoomLines([])
         }}>reset board
         </button>
@@ -372,6 +377,7 @@ export default function AdminMapBuilder() {
         {compButton === "all" && tiles.map((tile) => <div style={{display: "inline-block"}}>
           <div
               className={`tile ${tile} frame`}
+              style={tile==="empty"?{borderStyle:"solid"}:{}}
               id={`${tile}_i`}
               draggable={true}
               onDragStart={handleDrag}
@@ -415,25 +421,40 @@ export default function AdminMapBuilder() {
           sensorConnectToSensor(twoDarray);  //rules number 2
           sensorNotConnected(twoDarray); //rules number 3
           boardNotConnected(twoDarray); //rules number 12
-          let room=[]
+          let room=[];
           roomLines.forEach((elem)=>{
-            let arr=[]
-            let square=elem["start"]
-            let x=parseInt(square.split("_")[0]),y=parseInt(square.split("_")[1])
-            let size=parseInt(elem["size"])+1
-            console.log(x,y,square,size)
-            let sizeIn=0,sizeOut=0
+            let arr=[];
+            let square=elem["start"];
+            let x=parseInt(square.split("_")[0]),y=parseInt(square.split("_")[1]);
+            let size=parseInt(elem["size"])+1;
+            console.log(x,y,square,size);
+            let sizeIn=0,sizeOut=0;
             while(sizeIn<size){
-              sizeOut=0
+              sizeOut=0;
               while(sizeOut<size){
-                arr.push(`${x+sizeOut}_${y}`)
+                arr.push(`${x+sizeOut}_${y}`);
                 sizeOut++
               }
-              sizeIn++
+              sizeIn++;
               y++
             }
             room.push(arr)
+          });
+          let roomInRoom=false
+          room.reduce((a,b)=>{
+            console.log(a,b)
+            a.forEach((elem)=>{
+              if(b.indexOf(elem)>-1){
+                console.log("ccc")
+                roomInRoom=true
+              }
+            })
+            return b
           })
+          if(roomInRoom){
+            alert("room in room")
+          }
+
           console.log(room)
         }}>submit
         </button>
@@ -442,6 +463,7 @@ export default function AdminMapBuilder() {
           localStorage.setItem("position",JSON.stringify(placedTiles));
           localStorage.setItem("room",JSON.stringify(roomLines))
         }}>save</button>
+        <Settings />
       </div>
     </div>
     {lines.map(x => x[2])}
