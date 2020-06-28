@@ -10,12 +10,7 @@
 .placed.tile {
   position: absolute;
 }
-.enter-sensor{
-  background: url(/pir.png);
-}
-.light-detector{
-  background: url(/light.png);
-}
+
 .board {
   background: url(/board.png);
 }
